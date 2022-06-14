@@ -1,30 +1,41 @@
-import sys # for path manipulation
-sys.path.append("../") # add openbubi.py's folder to the current path
+import urllib.parse  # for parsing urls
+import os  # for running termux-location
+import json  # for converting the command-line output to dictionary
 import openbubi
-import json # for converting the command-line output to dictionary
-import os # for running termux-location
-import urllib.parse # for parsing urls
+import sys  # for path manipulation
+sys.path.append("../")  # add openbubi.py's folder to the current path
+
+"""
+The purpose of this example code is to locate the nearest BuBi station for you
+based on your phone's termux location data (command line for Android).
+"""
 
 Budapest = openbubi.BubiMap()
 
-currentLocation = os.popen("termux-location").read() # read the current location
+# read the current location
+currentLocation = os.popen("termux-location").read()
 
-currentLocationDict = json.loads(currentLocation) # convert it to a dictionary
+currentLocationDict = json.loads(currentLocation)  # convert it to a dictionary
 
-lat = currentLocationDict["latitude"]; lon = currentLocationDict["longitude"] # parse it
+lat = currentLocationDict["latitude"]
+lon = currentLocationDict["longitude"]  # parse it
 
-nearestStation = Budapest.getNearestStation(lat, lon) # call getNearestStation(), and provide lat, lon
+# call getNearestStation(), and provide lat, lon
+nearestStation = Budapest.getNearestStation(lat, lon)
 # this will return the nearest station's name
 
 nearestStationInfo = {
-  "name": nearestStation,
-  "bikesOnStation": Budapest.countBikesOnStation(nearestStation), # count the bikes on that station
-  "coordinates": json.loads(Budapest.getCoordinatesOfStation(nearestStation)) # get the coordinates of that station, and convert it to a dictionary
+    "name": nearestStation,
+    # count the bikes on that station
+    "bikesOnStation": Budapest.countBikesOnStation(nearestStation),
+    # get the coordinates of that station, and convert it to a dictionary
+    "coordinates": json.loads(Budapest.getCoordinatesOfStation(nearestStation))
 }
 
 startingPoint = urllib.parse.quote(f"{lat},{lon}")
 # make a starting point in a url-friendly format (based on the current coordinates)
-destinationPoint = urllib.parse.quote(f"{nearestStationInfo['coordinates']['lat']},{nearestStationInfo['coordinates']['lon']}")
+destinationPoint = urllib.parse.quote(
+    f"{nearestStationInfo['coordinates']['lat']},{nearestStationInfo['coordinates']['lon']}")
 # make an ending point in a url-friendly format (based on the station's coordinates)
 googlemapsurl = f"https://www.google.com/maps?f=d&saddr={startingPoint}&daddr={destinationPoint}&dirflg=d"
 # generate the Google Maps URL
@@ -34,7 +45,7 @@ googlemapsurl = f"https://www.google.com/maps?f=d&saddr={startingPoint}&daddr={d
 # calculate a Google Maps route to the station
 
 print(
- f"""
+    f"""
  Station found...
 
  Informations:
